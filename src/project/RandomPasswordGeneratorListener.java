@@ -23,7 +23,15 @@ class RandomPasswordGeneratorListener implements ActionListener{
 			rp.Clear(); //chiamata funzione
 		}
 		else if(b.getText().equals("Generate")) {
-			rp.Generate(); //chiamata funzione
+			try {
+				rp.Generate();
+			} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} //chiamata funzione
+		}
+		else if(b.getText().equals("Copy")) {
+			rp.Copy();
 		}
 		else {
 			rp.Exit(); //chiamata funzione

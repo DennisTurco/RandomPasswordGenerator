@@ -1,14 +1,25 @@
 package project;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.io.File;
+import java.io.IOException;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
 import java.util.Random; //per il random number generator
 
+@SuppressWarnings("serial")
 class RandomPasswordGenerator extends JFrame{
-	
 	private JLabel textComment;
 	private JTextField textPassword;
 	private JCheckBox spunta1, spunta2, spunta3, spunta4;
 	private JSlider slider;
+	private JButton btnCopy, btnGenerate;
 	
 	public RandomPasswordGenerator() {
 		setTitle("Random Password Generator");
@@ -18,6 +29,8 @@ class RandomPasswordGenerator extends JFrame{
 		setResizable(false);
 		getContentPane().setBackground(new Color(18, 15, 37)); //setta il colore dello sfondo
 		
+		ImageIcon image = new ImageIcon(".//res//logo.png"); //crea un'icona
+		setIconImage(image.getImage());	//cambia l'icona del frame
 		
 		//creazione oggetto actionlistener
 		RandomPasswordGeneratorListener g = new RandomPasswordGeneratorListener(this);
@@ -27,8 +40,15 @@ class RandomPasswordGenerator extends JFrame{
 		JPanel pan1 = new JPanel();
 		pan1.setLayout(new GridLayout(10, 0, 0, 7));
 		pan1.setBackground(new Color(18, 15, 37));
-		this.add(pan1, BorderLayout.CENTER);	;
+		this.add(pan1, BorderLayout.CENTER);	
 		
+		JPanel pan2 = new JPanel();
+		pan2.setLayout(new FlowLayout(1, 2, 2));
+		pan2.setBackground(new Color(18, 15, 37));
+		
+		JPanel pan3 = new JPanel();
+		pan2.setLayout(new GridLayout());
+		pan2.setBackground(new Color(18, 15, 37));
 		
 		//BORDI LATERALI
 		JPanel panEast = new JPanel();
@@ -52,7 +72,7 @@ class RandomPasswordGenerator extends JFrame{
 		this.add(panSouth, BorderLayout.SOUTH);
 		
 		
-		JLabel author = new JLabel("Authors: © DennisTurco & Adrian Tunea");
+		JLabel author = new JLabel("Authors: Â© DennisTurco & Adrian Tunea");
 		author.setFont(new Font("Arial", Font.BOLD, 15));
 		author.setForeground(new Color(163, 24, 21));
 		author.setHorizontalTextPosition(0);
@@ -87,7 +107,7 @@ class RandomPasswordGenerator extends JFrame{
 		pan1.add(spunta4);
 		
 		
-		JLabel text1 = new JLabel("Quantità Caratteri: ", JLabel.CENTER);
+		JLabel text1 = new JLabel("QuantitÃ  Caratteri: ", JLabel.CENTER);
 		text1.setFont(new Font("Arial", Font.BOLD, 20));
 		text1.setForeground(Color.GREEN);
 		pan1.add(text1);
@@ -103,29 +123,45 @@ class RandomPasswordGenerator extends JFrame{
 		slider.setForeground(Color.WHITE);
 		pan1.add(slider);
 		
+		//pan3 serve par dare spazio fra gli elementi
+		pan1.add(pan3, BorderLayout.CENTER);
+		pan3.setBackground(new Color(18, 15, 37));
+		
+		pan1.add(pan2, BorderLayout.CENTER);
 		
 		//bottone Generate
-		JButton btnGenerate = new JButton("Generate");
+		btnGenerate = new JButton("Generate");
 		btnGenerate.setFont(new Font("Comic Sans ms", Font.BOLD, 20));
 		btnGenerate.setSize(2, 0);
-		pan1.add(btnGenerate);
+		pan2.add(btnGenerate);
 		btnGenerate.addActionListener(g);
+
+		//bottone copy
+		btnCopy = new JButton("Copy");
+		btnCopy.setFont(new Font("Comic Sans ms", Font.BOLD, 20));
+		btnCopy.setSize(40, 30);
+		btnCopy.setEnabled(false);  //inizialmente non c'Ã¨ nulla da copiare quindi Ã¨ disattivato
+		pan2.add(btnCopy);
+		btnCopy.addActionListener(g);
 		
-		
+				
 		//Stringa Password
 		textPassword = new JTextField("", JTextField.CENTER);
 		textPassword.setFont(new Font("Arial", Font.BOLD, 20));
 		textPassword.setForeground(Color.GREEN);
-		textPassword.setVisible(false); //inizilamente non deve essere visibile poichè non generata
+		textPassword.setSize(20, 10);
+		textPassword.setVisible(false); //inizilamente non deve essere visibile poichÃ¨ non generata
 		textPassword.setHorizontalAlignment(0);
 		textPassword.setBackground(new Color(18, 15, 37));
 		pan1.add(textPassword);
 		
+		
+
 		//Stringa Commento
 		textComment = new JLabel("", JLabel.CENTER);
 		textComment.setFont(new Font("Arial", Font.BOLD, 10));
 		textComment.setForeground(Color.GREEN);
-		textComment.setVisible(false); //inizilamente non deve essere visibile poichè non generata
+		textComment.setVisible(false); //inizilamente non deve essere visibile poichÃ¨ non generata
 		pan1.add(textComment);
 		
 		
@@ -140,8 +176,7 @@ class RandomPasswordGenerator extends JFrame{
 		btnExit.setFont(new Font("Comic Sans ms", Font.BOLD, 20));
 		btnExit.setSize(40, 30);
 		panSouth.add(btnExit);
-		btnExit.addActionListener(g);
-		
+		btnExit.addActionListener(g);	
 	}
 	
 	
@@ -154,18 +189,27 @@ class RandomPasswordGenerator extends JFrame{
 		slider.setValue(10);
 		textPassword.setText("");
 		textPassword.setVisible(false);
+		btnCopy.setEnabled(false);
 		textComment.setText("");
+		textComment.setVisible(false);
 		return;
 	}
 	
-	public void Exit() {
+	void Exit() {
 		System.out.println("Event ----> Exit");
 		System.exit(EXIT_ON_CLOSE);
 		return;
 	}
 	
-	public void Generate() {
+	void Generate() throws UnsupportedAudioFileException, IOException, LineUnavailableException {
 		System.out.println("Event ----> Generate");
+		
+		// -------- Apertura Sound ----------
+		File file = new File(".//res//Spin.wav");
+		AudioInputStream audioStream = AudioSystem.getAudioInputStream(file);
+		Clip clip = AudioSystem.getClip();
+		clip.open(audioStream);
+		clip.start();
 		
 		Random random = new Random();  //oggetto della classe Random
 		int value;
@@ -182,12 +226,11 @@ class RandomPasswordGenerator extends JFrame{
 			textPassword.setVisible(true);
 			return;
 		}
-		
+
 		//costruzione stringa password
 		for(int i=0; i<slider.getValue(); i++) {
 			
 			value = random.nextInt(4 - 1 + 1) + 1;  //questa funzione ci da un numero randomico compreso tra 1 e 4
-			System.out.println(value);
 			
 			if(spunta1.isSelected()==true &&  value == 1) {
 				//lettera minuscola
@@ -213,6 +256,7 @@ class RandomPasswordGenerator extends JFrame{
 			else {  //a volte capita che non entra in nessun if quindi resetto il ciclo con i--
 				i--;
 			}
+			
 		}
 		
 		//stampa a schermo
@@ -220,9 +264,81 @@ class RandomPasswordGenerator extends JFrame{
 		textPassword.setForeground(Color.GREEN);
 		textPassword.setVisible(true);
 		
+		
+		//attivazione del tasto copy
+		btnCopy.setEnabled(true);
+		
+		
+		//chiamata alla funzione commento
+		Comment();
+		
+		return;
+			
+		
+	}
+	
+	void Comment() {
+		
+		int cont = 0;
+		if(spunta1.isSelected()==true) cont++;
+		if(spunta2.isSelected()==true) cont++;
+		if(spunta3.isSelected()==true) cont++;
+		if(spunta4.isSelected()==true) cont++;
+		
+		if((cont == 4 && slider.getValue() >= 6) || (cont >= 1 && slider.getValue() >= 12) || (cont >= 2 && slider.getValue() >= 10) || (cont >= 3 && slider.getValue() >= 8)) {
+			textComment.setVisible(true);
+			textComment.setForeground(Color.GREEN);
+			textComment.setText("Password Strong!");
+		}
+		else if((cont == 4 && slider.getValue() < 6) || (cont >= 1 && slider.getValue() < 12 && slider.getValue() > 8) || (cont >= 2 && slider.getValue() < 10 && slider.getValue() > 6) || (cont >= 3 && slider.getValue() < 8 && slider.getValue() > 4)) {
+			textComment.setVisible(true);
+			textComment.setForeground(Color.YELLOW);
+			textComment.setText("Password Moderate!");
+		}
+		else {
+			textComment.setVisible(true);
+			textComment.setForeground(Color.RED);
+			textComment.setText("Password Weak!");
+		}
+		
 		return;
 	}
 
+	/*public void SimpleTimer() {  //funzione timer
+		timer = new Timer(500, new ActionListener() {
+			int seconds = 0;
+			String loading = ".";
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {		
+				textPassword.setText(loading);
+				loading = loading + ".";
+				seconds++;
+				
+				if(seconds == 4) {
+					textPassword.setText("");
+					timer.stop();	
+					btnGenerate.setEnabled(true); //a questo punto il bottone torna cliccabile
+					GeneratePass();
+					
+				}
+			}
+			
+		});
+	}*/
+		
+	
+	void Copy(){
+		
+		//copia il testo
+		StringSelection stringSelection = new StringSelection(textPassword.getText());
+		Clipboard clpbrd = Toolkit.getDefaultToolkit ().getSystemClipboard ();
+		clpbrd.setContents (stringSelection, null);
+		
+		//messaggio popup
+		JOptionPane.showMessageDialog(null, "Password has been Copied!", "Confermed", 1);
+		
+	}
 
 	
 }
