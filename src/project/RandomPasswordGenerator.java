@@ -2,7 +2,9 @@ package project;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import javax.sound.sampled.AudioInputStream;
@@ -19,7 +21,7 @@ class RandomPasswordGenerator extends JFrame{
 	private JTextField textPassword;
 	private JCheckBox spunta1, spunta2, spunta3, spunta4;
 	private JSlider slider;
-	private JButton btnCopy, btnGenerate;
+	private JButton btnCopy, btnGenerate, btnSave;
 	
 	public RandomPasswordGenerator() {
 		setTitle("Random Password Generator");
@@ -43,12 +45,17 @@ class RandomPasswordGenerator extends JFrame{
 		this.add(pan1, BorderLayout.CENTER);	
 		
 		JPanel pan2 = new JPanel();
-		pan2.setLayout(new FlowLayout(1, 2, 2));
+		pan2.setLayout(new FlowLayout(1, 10, 0));
 		pan2.setBackground(new Color(18, 15, 37));
 		
 		JPanel pan3 = new JPanel();
 		pan2.setLayout(new GridLayout());
 		pan2.setBackground(new Color(18, 15, 37));
+		
+		JPanel pan4 = new JPanel();
+		pan2.setLayout(new FlowLayout(1, 10, 0));
+		pan2.setBackground(new Color(18, 15, 37));
+
 		
 		//BORDI LATERALI
 		JPanel panEast = new JPanel();
@@ -79,35 +86,35 @@ class RandomPasswordGenerator extends JFrame{
 		panNorth.add(author);
 		
 		//spunta 1
-		spunta1 = new JCheckBox(" Lettere Minuscole", false); 	//creazione oggetto di tipo JCheckBox
+		spunta1 = new JCheckBox(" Lowercase letters", false); 	//creazione oggetto di tipo JCheckBox
 		spunta1.setFont(new Font("Comic Sans ms", Font.BOLD, 17));	//modifica il font
 		spunta1.setForeground(Color.GREEN);  						//modifica colore scritta
 		spunta1.setBackground(new Color(18, 15, 37));				//modifica colore sfondo
 		pan1.add(spunta1);
 		
 		//spunta 2
-		spunta2 = new JCheckBox(" Lettere Maiuscole", false);
+		spunta2 = new JCheckBox(" Uppercase letters", false);
 		spunta2.setFont(new Font("Comic Sans ms", Font.BOLD, 17));
 		spunta2.setForeground(Color.GREEN); 						
 		spunta2.setBackground(new Color(18, 15, 37));
 		pan1.add(spunta2);
 		
 		//spunta 3
-		spunta3 = new JCheckBox(" Lettere Speciali", false);
+		spunta3 = new JCheckBox(" Special letters", false);
 		spunta3.setFont(new Font("Comic Sans ms", Font.BOLD, 17));
 		spunta3.setForeground(Color.GREEN); 						
 		spunta3.setBackground(new Color(18, 15, 37));
 		pan1.add(spunta3);
 		
 		//spunta 4
-		spunta4 = new JCheckBox(" Numeri", false);
+		spunta4 = new JCheckBox(" Numbers", false);
 		spunta4.setFont(new Font("Comic Sans ms", Font.BOLD, 17));
 		spunta4.setForeground(Color.GREEN); 						
 		spunta4.setBackground(new Color(18, 15, 37));
 		pan1.add(spunta4);
 		
 		
-		JLabel text1 = new JLabel("Quantità Caratteri: ", JLabel.CENTER);
+		JLabel text1 = new JLabel("Quantity of characters: ", JLabel.CENTER);
 		text1.setFont(new Font("Arial", Font.BOLD, 20));
 		text1.setForeground(Color.GREEN);
 		pan1.add(text1);
@@ -135,14 +142,24 @@ class RandomPasswordGenerator extends JFrame{
 		btnGenerate.setSize(2, 0);
 		pan2.add(btnGenerate);
 		btnGenerate.addActionListener(g);
-
+		
 		//bottone copy
 		btnCopy = new JButton("Copy");
 		btnCopy.setFont(new Font("Comic Sans ms", Font.BOLD, 20));
-		btnCopy.setSize(40, 30);
+		btnCopy.setSize(10, 15);
 		btnCopy.setEnabled(false);  //inizialmente non c'è nulla da copiare quindi è disattivato
+		btnCopy.setToolTipText("Copy the password");
 		pan2.add(btnCopy);
 		btnCopy.addActionListener(g);
+		
+		//bottone save
+		btnSave = new JButton("Save");
+		btnSave.setFont(new Font("Comic Sans ms", Font.BOLD, 20));
+		btnSave.setSize(20, 15);
+		btnSave.setEnabled(false);  //inizialmente non c'è nulla da salvare quindi è disattivato
+		btnSave.setToolTipText("Save the password");
+		pan2.add(btnSave);
+		btnSave.addActionListener(g);
 		
 				
 		//Stringa Password
@@ -154,7 +171,6 @@ class RandomPasswordGenerator extends JFrame{
 		textPassword.setHorizontalAlignment(0);
 		textPassword.setBackground(new Color(18, 15, 37));
 		pan1.add(textPassword);
-		
 		
 
 		//Stringa Commento
@@ -177,6 +193,13 @@ class RandomPasswordGenerator extends JFrame{
 		btnExit.setSize(40, 30);
 		panSouth.add(btnExit);
 		btnExit.addActionListener(g);	
+	
+		JButton btnHistory = new JButton("Password List");
+		btnHistory.setFont(new Font ("Comic Sans ms", Font.BOLD, 20));
+		btnHistory.setSize(40, 30);
+		panSouth.add(btnHistory);
+		btnHistory.addActionListener(g);
+		
 	}
 	
 	
@@ -190,6 +213,7 @@ class RandomPasswordGenerator extends JFrame{
 		textPassword.setText("");
 		textPassword.setVisible(false);
 		btnCopy.setEnabled(false);
+		btnSave.setEnabled(false);
 		textComment.setText("");
 		textComment.setVisible(false);
 		return;
@@ -199,6 +223,15 @@ class RandomPasswordGenerator extends JFrame{
 		System.out.println("Event ----> Exit");
 		System.exit(EXIT_ON_CLOSE);
 		return;
+	}
+	
+	void PasswordList() throws Exception {
+		System.out.println("Event --> Password List");
+		
+		Runtime runtime = Runtime.getRuntime();
+		
+		@SuppressWarnings("unused")  //per togliere il warning
+		Process process = runtime.exec("notepad.exe res//PasswordList");
 	}
 	
 	void Generate() throws UnsupportedAudioFileException, IOException, LineUnavailableException {
@@ -268,6 +301,8 @@ class RandomPasswordGenerator extends JFrame{
 		//attivazione del tasto copy
 		btnCopy.setEnabled(true);
 		
+		//attivazione del tasto save
+		btnSave.setEnabled(true);
 		
 		//chiamata alla funzione commento
 		Comment();
@@ -329,7 +364,6 @@ class RandomPasswordGenerator extends JFrame{
 		
 	
 	void Copy(){
-		
 		//copia il testo
 		StringSelection stringSelection = new StringSelection(textPassword.getText());
 		Clipboard clpbrd = Toolkit.getDefaultToolkit ().getSystemClipboard ();
@@ -338,6 +372,25 @@ class RandomPasswordGenerator extends JFrame{
 		//messaggio popup
 		JOptionPane.showMessageDialog(null, "Password has been Copied!", "Confermed", 1);
 		
+	}
+	
+	void Save() {
+		//messaggio popup
+		String response;
+		response = JOptionPane.showInputDialog("Insert name for the current Password: ");
+		
+		try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("res//PasswordList", true));
+            System.out.println("Event ----> Save");
+            bw.write("\n• " + response + ":\t" + textPassword.getText());
+            bw.close();
+            
+        } catch (IOException e) {
+            System.out.println("Exception --> " + e);
+            return;
+        }
+		
+		//BufferedWriter
 	}
 
 	

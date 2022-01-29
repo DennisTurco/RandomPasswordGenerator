@@ -6,8 +6,7 @@ class RandomPasswordGeneratorMain {
 	public static void main(String[] args) {
 		RandomPasswordGenerator nb = new RandomPasswordGenerator();		
 		nb.setVisible(true);
-		nb.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+		nb.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
 	}
 }
 

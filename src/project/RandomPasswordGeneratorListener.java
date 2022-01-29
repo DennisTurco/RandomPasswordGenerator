@@ -33,6 +33,17 @@ class RandomPasswordGeneratorListener implements ActionListener{
 		else if(b.getText().equals("Copy")) {
 			rp.Copy();
 		}
+		else if(b.getText().equals("Save")) {
+			rp.Save();
+		}
+		else if(b.getText().equals("Password List")) {
+			try {
+				rp.PasswordList();
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
 		else {
 			rp.Exit(); //chiamata funzione
 		}
