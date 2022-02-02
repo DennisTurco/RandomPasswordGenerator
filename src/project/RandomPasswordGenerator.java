@@ -51,10 +51,6 @@ class RandomPasswordGenerator extends JFrame{
 		JPanel pan3 = new JPanel();
 		pan2.setLayout(new GridLayout());
 		pan2.setBackground(new Color(18, 15, 37));
-		
-		JPanel pan4 = new JPanel();
-		pan2.setLayout(new FlowLayout(1, 10, 0));
-		pan2.setBackground(new Color(18, 15, 37));
 
 		
 		//BORDI LATERALI
@@ -237,6 +233,16 @@ class RandomPasswordGenerator extends JFrame{
 	void Generate() throws UnsupportedAudioFileException, IOException, LineUnavailableException {
 		System.out.println("Event ----> Generate");
 		
+		
+		//se tutti i checkbox sono false(non atttivati) allora si termina la funzione 
+		if(spunta1.isSelected()==false && spunta2.isSelected()==false && spunta3.isSelected()==false && spunta4.isSelected()==false) {
+			textPassword.setText("Error! Argument Missing!");
+			textPassword.setForeground(Color.RED);
+			textPassword.setVisible(true);
+			Comment();
+			return;
+		}
+		
 		// -------- Apertura Sound ----------
 		File file = new File(".//res//Spin.wav");
 		AudioInputStream audioStream = AudioSystem.getAudioInputStream(file);
@@ -250,15 +256,8 @@ class RandomPasswordGenerator extends JFrame{
 		String letters = "abcdefghilmnopqrstuvzxykjw";
 		String numbers = "1234567890";
 		String specialChars = ",._-*?!";
-		String password = "";
+		String password = "";		
 		
-		//se tutti i checkbox sono false(non atttivati) allora si termina la funzione 
-		if(spunta1.isSelected()==false && spunta2.isSelected()==false && spunta3.isSelected()==false && spunta4.isSelected()==false) {
-			textPassword.setText("Error! Argument Missing!");
-			textPassword.setForeground(Color.RED);
-			textPassword.setVisible(true);
-			return;
-		}
 
 		//costruzione stringa password
 		for(int i=0; i<slider.getValue(); i++) {
@@ -314,53 +313,76 @@ class RandomPasswordGenerator extends JFrame{
 	
 	void Comment() {
 		
-		int cont = 0;
-		if(spunta1.isSelected()==true) cont++;
-		if(spunta2.isSelected()==true) cont++;
-		if(spunta3.isSelected()==true) cont++;
-		if(spunta4.isSelected()==true) cont++;
+		String letters = "abcdefghilmnopqrstuvzxykjw";
+		String numbers = "1234567890";
+		String specialChars = ",._-*?!";
+		String password = textPassword.getText();
+		int n = 0;
 		
-		if((cont == 4 && slider.getValue() >= 6) || (cont >= 1 && slider.getValue() >= 12) || (cont >= 2 && slider.getValue() >= 10) || (cont >= 3 && slider.getValue() >= 8)) {
+		//caso della stringa vuota
+		if (textPassword.getText() == "Error! Argument Missing!") {
 			textComment.setVisible(true);
-			textComment.setForeground(Color.GREEN);
-			textComment.setText("Password Strong!");
+			textComment.setForeground(Color.RED);
+			textComment.setText("Password Too Short!");
 		}
-		else if((cont == 4 && slider.getValue() < 6) || (cont >= 1 && slider.getValue() < 12 && slider.getValue() > 8) || (cont >= 2 && slider.getValue() < 10 && slider.getValue() > 6) || (cont >= 3 && slider.getValue() < 8 && slider.getValue() > 4)) {
+		
+		
+		//lettere minuscole e maiuscole
+		for (int i=0; i<password.length(); i++){
+			for (int j=0; j<letters.length(); j++) {
+				if ( (password.charAt(i) == letters.charAt(j)) || (password.charAt(i) == letters.toUpperCase().charAt(j)) ) {
+					n = n + 3;
+				}
+			}
+		}
+		//numeri
+		for (int i=0; i<password.length(); i++){
+			for (int j=0; j<numbers.length(); j++) {
+				if (password.charAt(i) == numbers.charAt(j)) {
+					n = n + 8;
+				}
+			}
+		}
+		//caratteri speciali
+		for (int i=0; i<password.length(); i++){
+			for (int j=0; j<specialChars.length(); j++) {
+				if (password.charAt(i) == specialChars.charAt(j)) {
+					n = n + 10;
+				}
+			}
+		}
+		
+		if (n == 0) {
 			textComment.setVisible(true);
-			textComment.setForeground(Color.YELLOW);
-			textComment.setText("Password Moderate!");
+			textComment.setForeground(Color.RED);
+			textComment.setText("Password Too Short!");
 		}
-		else {
+		if (n > 0 && n < 20) {
+			textComment.setVisible(true);
+			textComment.setForeground(Color.RED);
+			textComment.setText("Password Very Weak!");
+		}
+		if (n >= 20 && n < 40) {
 			textComment.setVisible(true);
 			textComment.setForeground(Color.RED);
 			textComment.setText("Password Weak!");
 		}
-		
-		return;
+		if (n >= 40 && n < 60) {
+			textComment.setVisible(true);
+			textComment.setForeground(Color.YELLOW);
+			textComment.setText("Password Good!");	
+		}
+		if (n >= 60 && n < 80) {
+			textComment.setVisible(true);
+			textComment.setForeground(Color.GREEN);
+			textComment.setText("Password Strong!");
+		}
+		if (n >= 80) {
+			textComment.setVisible(true);
+			textComment.setForeground(Color.GREEN);
+			textComment.setText("Password Very Strong!");
+		}
 	}
-
-	/*public void SimpleTimer() {  //funzione timer
-		timer = new Timer(500, new ActionListener() {
-			int seconds = 0;
-			String loading = ".";
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {		
-				textPassword.setText(loading);
-				loading = loading + ".";
-				seconds++;
-				
-				if(seconds == 4) {
-					textPassword.setText("");
-					timer.stop();	
-					btnGenerate.setEnabled(true); //a questo punto il bottone torna cliccabile
-					GeneratePass();
-					
-				}
-			}
-			
-		});
-	}*/
 		
 	
 	void Copy(){
@@ -379,10 +401,16 @@ class RandomPasswordGenerator extends JFrame{
 		String response;
 		response = JOptionPane.showInputDialog("Insert name for the current Password: ");
 		
+		String response2;
+		response2 = JOptionPane.showInputDialog("Insert email associated at the currunt Password: ");
+		
+		//caso d'errore
+		if (response == null || response2 == null) return;
+		
 		try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter("res//PasswordList", true));
+            BufferedWriter bw = new BufferedWriter(new FileWriter("res//PasswordList", true));  //modalita' append
             System.out.println("Event ----> Save");
-            bw.write("\n• " + response + ":\t" + textPassword.getText());
+            bw.write("\n• " + response + ":\n\tEmail: " + response2 + "\n\tPassword: " + textPassword.getText() + "\n");
             bw.close();
             
         } catch (IOException e) {
@@ -390,7 +418,6 @@ class RandomPasswordGenerator extends JFrame{
             return;
         }
 		
-		//BufferedWriter
 	}
 
 	
